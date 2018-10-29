@@ -1,1 +1,3 @@
-# INE5420_Trabalho01
+# INE5420 - Computação Gráfica - Trabalho 01
+
+Implementação de um sistema básico de Computação Gráfica
