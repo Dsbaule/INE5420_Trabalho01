@@ -25,7 +25,7 @@ public:
 		return *info;
 	}
 
-	T* getInfoPointer() const
+    T* getInfoPointer() const
 	{
 		return info;
 	}
@@ -34,7 +34,7 @@ public:
 	{
 		_next = next;
 	}
-
 };
 
 #endif
+	 	  	 	     	   	      	     	  	     	  	 	

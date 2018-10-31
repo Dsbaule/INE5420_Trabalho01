@@ -2,18 +2,14 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "Viewport.hpp"
+#include "Objects.hpp"
+#include "Transformation.hpp"
 
-//Objetos da main window
+// Objetos da main window
 GtkBuilder *builder;
 Viewport* viewport;
 Coordinates polygon_coords;
-Coordinates curve_coords;
-Coordinates surface_coords;
-gint rows_s;
-gint columns_s;
-bool isObject3D = false;
-std::vector<Transformation> accumulator;
-std::vector<Polygon> faces_object3D;
 
 GObject *main_w;
 GtkListStore  *store;
@@ -23,6 +19,7 @@ GtkWidget *view;
 GtkTreeSelection* objects_select;
 
 GtkWidget* draw_viewport;
+
 GtkButton* zoom_in;
 GtkButton* zoom_out;
 GtkButton* move_down;
@@ -33,11 +30,12 @@ GtkButton* add_geometric_shape;
 GtkButton* change_object;
 GtkButton* rotate_left;
 GtkButton* rotate_right;
+
 GtkEntry* step_entry;
 GtkEntry* angle_entry;
 
 //Enum para TreeView
-enum {
+enum {	 	  	 	     	   	      	     	  	     	  	 	
   COL_ID = 0,
   COL_NAME,
   COL_TYPE,
@@ -109,12 +107,12 @@ void fill_treeview (const char* name, const char* type);
 void create_treeview (void);
 
 int main (int argc, char **argv)
-{
+{	 	  	 	     	   	      	     	  	     	  	 	
     gtk_init (&argc, &argv);
 
 	/* Construct a GtkBuilder instance and load our UI description */
 	builder = gtk_builder_new ();
-	gtk_builder_add_from_file (builder, "interface.glade", NULL);
+	gtk_builder_add_from_file (builder, "Interface.glade", NULL);
 
     /* Connect signal handlers to the constructed widgets. */
     main_w = gtk_builder_get_object (builder, "main_w");
@@ -216,7 +214,7 @@ int main (int argc, char **argv)
 	gtk_main ();
 
 	return 0;
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 /* CALLBACKS */
 
@@ -253,24 +251,12 @@ void on_right_button_clicked (GtkWidget *widget, gpointer data) {
 
 void on_rotate_right_clicked (GtkWidget *widget, gpointer data) {
 	double angle = atof(gtk_entry_get_text(angle_entry));
-	if (gtk_toggle_button_get_active(x_check)) {
-	    viewport->rotate_window_on_x(-angle);
-	} else if (gtk_toggle_button_get_active(y_check)) {
-	    viewport->rotate_window_on_y(-angle);
-	} else if (gtk_toggle_button_get_active(z_check)) {
-	    viewport->rotate_window_on_z(-angle);
-	}
-}
+    viewport->rotate_window(-angle);
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 void on_rotate_left_clicked (GtkWidget *widget, gpointer data) {
 	double angle = atof(gtk_entry_get_text(angle_entry));
-	if (gtk_toggle_button_get_active(x_check)) {
-	    viewport->rotate_window_on_x(angle);
-	} else if (gtk_toggle_button_get_active(y_check)) {
-	    viewport->rotate_window_on_y(angle);
-	} else if (gtk_toggle_button_get_active(z_check)){
-	    viewport->rotate_window_on_z(angle);
-	}
+    viewport->rotate_window(angle);
 }
 
 void on_add_object_button_clicked (GtkWidget *widget, gpointer data) {
@@ -282,16 +268,14 @@ void on_add_point_clicked (GtkWidget *widget, gpointer data) {
 	const gchar* name = gtk_entry_get_text(name_point_entry);
 	double x1 = atof(gtk_entry_get_text(x1_point_entry));
 	double y1 = atof(gtk_entry_get_text(y1_point_entry));
-	double z1 = atof(gtk_entry_get_text(z1_point_entry));
 
 	fill_treeview(name,"Point");
-	Point* point = new Point(name, x1, y1, z1);
+	Point* point = new Point(name, x1, y1);
 	viewport->addObject(point);
 
     gtk_entry_set_text(name_point_entry,"");
     gtk_entry_set_text(x1_point_entry,"");
     gtk_entry_set_text(y1_point_entry,"");
-    gtk_entry_set_text(z1_point_entry,"");
     gtk_widget_hide (GTK_WIDGET(add_point_w));
 }
 
@@ -306,7 +290,7 @@ void on_add_line_clicked (GtkWidget *widget, gpointer data) {
 	double z2 = atof(gtk_entry_get_text(z2_line_entry));
 
 	fill_treeview(name,"Line");
-	Line* line = new Line(name, x1, y1, z1, x2, y2, z2);
+	Line* line = new Line(name, x1, y1, x2, y2);
 	viewport->addObject(line);
     gtk_entry_set_text(name_line_entry,"");
     gtk_entry_set_text(x1_line_entry,"");
@@ -316,14 +300,14 @@ void on_add_line_clicked (GtkWidget *widget, gpointer data) {
     gtk_entry_set_text(z1_line_entry,"");
     gtk_entry_set_text(z2_line_entry,"");
     gtk_widget_hide (GTK_WIDGET(add_line_w));
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 /* ADD_POLY */
 void on_add_point_poly_clicked (GtkWidget *widget, gpointer data) {
 	double x1 = atof(gtk_entry_get_text(x_poly_entry));
 	double y1 = atof(gtk_entry_get_text(y_poly_entry));
 	double z1 = atof(gtk_entry_get_text(z_poly_entry));
-	polygon_coords.push_back(Coordinate(x1,y1,z1));
+	polygon_coords.push_back(Coordinate(x1,y1));
     gtk_entry_set_text(x_poly_entry,"");
     gtk_entry_set_text(y_poly_entry,"");
     gtk_entry_set_text(z_poly_entry,"");
@@ -332,17 +316,11 @@ void on_add_point_poly_clicked (GtkWidget *widget, gpointer data) {
 void on_add_poly_clicked (GtkWidget *widget, gpointer data) {
   const gchar* name = gtk_entry_get_text(name_poly_entry);
 	Polygon* polygon = new Polygon(name, polygon_coords, gtk_toggle_button_get_active(filled));
-	if (!isObject3D) {
-	    fill_treeview(name,"Polygon");
-	    viewport->addObject(polygon);
-	    gtk_widget_hide (GTK_WIDGET(add_poly_w));
-	} else {
-	    faces_object3D.push_back(*polygon);
-	    gtk_widget_hide (GTK_WIDGET(add_poly_w));
-	}
+    fill_treeview(name,"Polygon");
+    viewport->addObject(polygon);
+    gtk_widget_hide (GTK_WIDGET(add_poly_w));
 	polygon_coords.clear();
     gtk_entry_set_text(name_poly_entry, "");
-
 }
 
 gboolean draw_objects(GtkWidget* widget, cairo_t* cr, gpointer data) {
@@ -371,7 +349,7 @@ gboolean draw_objects(GtkWidget* widget, cairo_t* cr, gpointer data) {
 
 	gtk_widget_queue_draw(draw_viewport);
 	return FALSE;
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 int get_index_selected() {
 	GtkTreeIter iter;
@@ -412,4 +390,4 @@ void create_treeview (void) {
 	gtk_tree_selection_set_mode(objects_select, GTK_SELECTION_SINGLE);
 
 	g_object_unref (model);
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
