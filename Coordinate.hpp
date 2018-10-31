@@ -36,7 +36,7 @@ class Coordinate: public std::vector<double> {
  			}
  			for (int i = 0; i < res.size(); ++i) {	 	  	 	     	   	      	     	  	     	  	 	
  				// bringing back to w = 1;
- 				this->at(i) = res[i]/res[res.size()];
+ 				this->at(i) = res[i]/res[res.size() - 1];
  			}
  		}
 

@@ -1,6 +1,7 @@
 #ifndef VIEWPORT_HPP
 #define VIEWPORT_HPP
 
+#include <iostream>
 #include "Window.hpp"
 #include "Objects.hpp"
 #include "ListaEnc.hpp"
@@ -65,14 +66,23 @@ void Viewport::rotate_window(double degrees) {
 
 void Viewport::normalize_obj(Object* obj) {
 	Transformation t = _window->get_transformation();
+	std::cout << "Transformation:\n";
+	std::cout << t;
+	std::cout << "\n";
 	obj->set_normalized_coords(t);
+	Coordinate coords = obj->get_coord_at_index(0);
+	std::cout << coords;
+	std::cout << "\n";
+	coords =  obj->get_normalized_coord_at_index(0);
+	std::cout << coords;
+	std::cout << "\n";
 }
 
 void Viewport::normalize_all_objs() {
 	_window->update_transformation();
 	auto t = _window->get_transformation();
 
-	for (int i = 0; i < _objetos.tamanho(); i++) {
+	for (int i = 0; i < _objetos.tamanho(); i++) {	 	  	 	     	   	      	     	  	     	  	 	
 		Object* obj = _objetos.retornaDaPosicao(i);
 		obj->set_normalized_coords(t);
 	}
@@ -85,7 +95,7 @@ Coordinate Viewport::transformOneCoordinate(const Coordinate& coord) const {
 	double xvp = ((coord[0]-lowmin[0])/(uppermax[0]-lowmin[0]))*_width;
 	double yvp = (1-((coord[1]-lowmin[1])/(uppermax[1]-lowmin[1])))*_height;
 	return Coordinate(xvp,yvp);
-}	 	  	 	     	   	      	     	  	     	  	 	
+}
 
 Coordinates Viewport::transformOneCoordinates(const Coordinates& coords) const {
 	Coordinates transformed_vector;
@@ -113,7 +123,7 @@ void Viewport::drawLine(Object* objeto, cairo_t* cr) {
 	cairo_move_to(cr, transformed_vector[0][0]+10, transformed_vector[0][1]+10);
 	cairo_line_to(cr, transformed_vector[1][0]+10, transformed_vector[1][1]+10);
 	cairo_stroke(cr);
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 void Viewport::drawPolygon(Object* obj,cairo_t* cr) {
 	Coordinates transformed_vector = transformOneCoordinates(obj->get_normalized_coords());
@@ -123,7 +133,7 @@ void Viewport::drawPolygon(Object* obj,cairo_t* cr) {
 	for (int i = 1; i < transformed_vector.size(); ++i)
 		cairo_line_to(cr, transformed_vector[i][0]+10, transformed_vector[i][1]+10);
 	cairo_line_to(cr, transformed_vector[0][0]+10, transformed_vector[0][1]+10);
-	if(obj->isFilled()) {	 	  	 	     	   	      	     	  	     	  	 	
+	if(obj->isFilled()) {
 		cairo_fill(cr);
 	} else {
 		cairo_stroke(cr);
@@ -149,8 +159,7 @@ void Viewport::drawDisplayFile(cairo_t* cr) {
 			default:
 				break;
 		}
-	}
+	}	 	  	 	     	   	      	     	  	     	  	 	
 }
 
 #endif
-	 	  	 	     	   	      	     	  	     	  	 	
