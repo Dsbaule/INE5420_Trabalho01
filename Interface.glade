@@ -706,6 +706,16 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
   <object class="GtkWindow" id="main_w">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Computação Gráfica</property>
@@ -750,6 +760,37 @@
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="save_file_event" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuView">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">View</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem1">
+                        <property name="label">Reset Rotation</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image1</property>
+                        <property name="use_stock">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem4">
+                        <property name="label">Reset Position</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="image">image2</property>
+                        <property name="use_stock">False</property>
                       </object>
                     </child>
                   </object>
@@ -844,7 +885,7 @@
                                 <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkButton" id="zoom_out">
-                                    <property name="label" translatable="yes">Zoom out</property>
+                                    <property name="label" translatable="yes">-</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -859,7 +900,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="zoom_in">
-                                    <property name="label" translatable="yes">Zoom in </property>
+                                    <property name="label" translatable="yes">+</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -889,7 +930,7 @@
                                     <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkButton" id="move_up">
-                                        <property name="label" translatable="yes">Up</property>
+                                        <property name="label" translatable="yes">↑</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -915,7 +956,7 @@
                                     <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkButton" id="move_left">
-                                        <property name="label" translatable="yes">Left</property>
+                                        <property name="label" translatable="yes">←</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -930,7 +971,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="move_right">
-                                        <property name="label" translatable="yes">Right</property>
+                                        <property name="label" translatable="yes">→</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -962,7 +1003,7 @@
                                         <property name="yscale">0.56000000238418579</property>
                                         <child>
                                           <object class="GtkButton" id="move_down">
-                                            <property name="label" translatable="yes">Down</property>
+                                            <property name="label" translatable="yes">↓</property>
                                             <property name="width_request">65</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -1134,7 +1175,7 @@
                                 <property name="column_homogeneous">True</property>
                                 <child>
                                   <object class="GtkButton" id="rotate_left">
-                                    <property name="label" translatable="yes">Rotate Left</property>
+                                    <property name="label" translatable="yes">↶</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1149,7 +1190,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="rotate_right">
-                                    <property name="label" translatable="yes">Rotate Right</property>
+                                    <property name="label" translatable="yes">↷</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1176,7 +1217,7 @@
                                 <property name="orientation">vertical</property>
                                 <child>
                                   <object class="GtkButton" id="add_geometric_shape">
-                                    <property name="label" translatable="yes">Add Geometric Shape</property>
+                                    <property name="label" translatable="yes">Add Object</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1191,7 +1232,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="change_object">
-                                    <property name="label" translatable="yes">Change Object Selected</property>
+                                    <property name="label" translatable="yes">Change Object</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -1460,4 +1501,3 @@
     </child>
   </object>
 </interface>
-	 	  	 	     	   	      	     	  	     	  	 	
