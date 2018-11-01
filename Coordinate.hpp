@@ -10,15 +10,16 @@ typedef std::vector<std::vector<double>> Matrix;
 
 class Coordinate: public std::vector<double> {
 	public:
- 		Coordinate(int n=2) {
- 			for (int i = 0; i < n; i++)
+ 		Coordinate(int n=3) {
+ 			for (int i = 0; i < 3; i++)
  				this->push_back(0);
  			this->push_back(1);
  		}
 
- 		Coordinate(double x, double y = 0) {
+ 		Coordinate(double x, double y, double z = 0) {
  			this->push_back(x);
  			this->push_back(y);
+ 			this->push_back(z);
  			this->push_back(1);
  		}
 
@@ -33,10 +34,10 @@ class Coordinate: public std::vector<double> {
  					sum += this->at(j) * m[j][i];
  				}
  				res.push_back(sum);
- 			}
- 			for (int i = 0; i < res.size(); ++i) {	 	  	 	     	   	      	     	  	     	  	 	
+ 			} 	  	 	     	  		  	  	    	      	 	
+ 			for (int i = 0; i < res.size(); ++i) {
  				// bringing back to w = 1;
- 				this->at(i) = res[i]/res[res.size() - 1];
+ 				this->at(i) = res[i]/res[3];
  			}
  		}
 
@@ -47,7 +48,7 @@ class Coordinate: public std::vector<double> {
                 this->at(i) = this->at(i) + other[i];
             return *this;
  		};
-
+ 		
  		friend Coordinate operator+(Coordinate lhs, const Coordinate& rhs) {
  			lhs += rhs;
  			return lhs;
@@ -60,7 +61,7 @@ class Coordinate: public std::vector<double> {
                 this->at(i) = this->at(i) - other[i];
             return *this;
  		};
-
+ 		
  		friend Coordinate operator-(Coordinate lhs, const Coordinate& rhs) {
  			lhs -= rhs;
  			return lhs;
@@ -72,7 +73,7 @@ class Coordinate: public std::vector<double> {
 			for (int i = 0; i < this->size(); ++i) {
 				if (this->at(i) != other[i])
 					return false;
-			}	 	  	 	     	   	      	     	  	     	  	 	
+			}	 	  	 	     	  		  	  	    	      	 	
 			return true;
 		};
 

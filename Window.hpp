@@ -5,15 +5,18 @@
 #include "Coordinate.hpp"
 #include "Transformation.hpp"
 
+enum window_view { PARALLEL, PERSPECTIVE };
+
 class Window {
 	public:
 		Window(double width, double height):
-			_center(width/2, height/2),
+			_center(width/2, height/2, 0),
 			_width(width),
 			_heigth(height),
-			_t({ {1, 0, 0},
-				 {0, 1, 0},
-				 {0, 0, 1} })
+			_t({ {1, 0, 0, 0},
+				 {0, 1, 0, 0},
+				 {0, 0, 1, 0},
+				 {0, 0, 0, 1} })
 		{}
 
 		virtual ~Window() {}
@@ -21,62 +24,96 @@ class Window {
 		double get_width() { return _width; }
 		double get_height() { return _heigth; }
 
-		double get_angle() { return _angle; }
+		double get_angle_x() { return _angle_x; }
+		double get_angle_y() { return _angle_y; }
+		double get_angle_z() { return _angle_z; }
 
-		void rotate(double degrees) { _angle += degrees; }
+		void rotate_x(double degrees) { _angle_x += degrees; }
+		void rotate_y(double degrees) { _angle_y += degrees; }
+		void rotate_z(double degrees) { _angle_z += degrees; }
+		void reset_rotation();
 
 		void zoom(double step);
 
 		void moveX(double value);
 		void moveY(double value);
+		void moveZ(double value);
+		void reset_position();
+
+		void change_view(const window_view view) { _view = view; }	 	  	 	     	   	      	     	  	     	  	 	
+		void set_focal_distance(double fov) { _d = (_width/2)/tan(fov/2); }
 
 		Coordinate lowmin() const { return Coordinate(-1,-1); }
 		Coordinate uppermax() const { return Coordinate(1,1); }
 		Coordinate center() const { return _center; }
 
-		Transformation& get_transformation() { return _t; }	 	  	 	     	   	      	     	  	     	  	 	
+		Transformation& get_transformation() { return _t; }
 		void update_transformation();
 
 	protected:
 	private:
-		void move(double x, double y) {
-			Coordinate c(x,y);
-			auto t = Transformation::generate_rotation_matrix(_angle);
+		void move(double x, double y, double z) {
+			Coordinate c(x,y,z);
+			auto t = Transformation::generate_rotation_matrix(_angle_x, _angle_y, _angle_z);
 			c.transform(t.get_transformation_matrix());
 			_center += c;
 		}
 
 		Coordinate _center;
-		double _angle = 0; // radians
+		double _angle_x = 0, _angle_y = 0, _angle_z = 0; // radians
 		double _width, _heigth;
 		double _d = 1000;
+		window_view _view = window_view::PERSPECTIVE;
 		Transformation _t;
 };
+
+void Window::reset_rotation() {
+	_angle_x = 0;
+	_angle_y = 0;
+	_angle_z = 0;
+}
 
 /* step > 0  -  Zoom in */
 void Window::zoom(double step) {
 	_width -= step;
 	_heigth -= step;
-}
+}	 	  	 	     	   	      	     	  	     	  	 	
 
 /* Move Window Horizontally */
 void Window::moveX(double value) {
-	move(value, 0);
+	move(value, 0, 0);
 }
 
 /* Move Window Vertically */
 void Window::moveY(double value) {
-	move(0, value);
+	move(0, value, 0);
+}
+
+void Window::moveZ(double value) {
+	move(0, 0, value);
+}
+
+void Window::reset_position() {
+	_center = Coordinate(get_width()/2, get_height()/2, 0);
 }
 
 void Window::update_transformation() {
-	_t = Transformation({ {1, 0, 0},
-						  {0, 1, 0},
-						  {0, 0, 1} });
-
-	_t *= Transformation::generate_translation_matrix(-_center[0], -_center[1]);
-	_t *= Transformation::generate_rotation_matrix(-_angle);
-	_t *= Transformation::generate_scaling_matrix(1/(_width/2), 1/(_heigth/2));
-}	 	  	 	     	   	      	     	  	     	  	 	
+	_t = Transformation({ {1, 0, 0, 0},
+						  {0, 1, 0, 0},
+						  {0, 0, 1, 0},
+						  {0, 0, 0, 1} });
+	switch(_view) {
+		case window_view::PERSPECTIVE:
+			_t *= Transformation::generate_translation_matrix(-_center[0], -_center[1], -_center[2] + _d);
+			_t *= Transformation::generate_rotation_matrix(-_angle_x, -_angle_y, -_angle_z);
+			_t *= Transformation::generate_perspective_matrix(_d);
+			_t *= Transformation::generate_scaling_matrix(1/(_width/2), 1/(_heigth/2), 4.0/(_width + _heigth));
+			break;
+		case window_view::PARALLEL:
+			_t *= Transformation::generate_translation_matrix(-_center[0], -_center[1], -_center[2]);
+			_t *= Transformation::generate_rotation_matrix(-_angle_x, -_angle_y, -_angle_z);
+			_t *= Transformation::generate_scaling_matrix(1/(_width/2), 1/(_heigth/2), 4.0/(_width + _heigth));
+	}	 	  	 	     	   	      	     	  	     	  	 	
+}
 
 #endif

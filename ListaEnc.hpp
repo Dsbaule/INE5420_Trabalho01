@@ -4,7 +4,7 @@
 template<typename T>
 class ListaEnc {
 
- public:
+public:
 	ListaEnc();
 	~ListaEnc();
 	// inicio
@@ -23,21 +23,21 @@ class ListaEnc {
 	T retira();
 	// especifico
 	T retiraEspecifico(const T& dado);
-	void adicionaEmOrdem(const T& data);
+	void adicionaEmOrdem(const T& dado);
 	bool listaVazia() const;
-	int tamanho() const;
 	bool igual(T dado1, T dado2);
 	bool maior(T dado1, T dado2);
 	bool menor(T dado1, T dado2);
 	void destroiLista();
+	int tamanho() { return this->size; };
 
- private:
+private:
 	Elemento<T>* head;
 	int size;
 };
 
 template<typename T>
-ListaEnc<T>::ListaEnc() {	 	  	 	     	   	      	     	  	     	  	 	
+ListaEnc<T>::ListaEnc() {	 	  	 	     	  		  	  	    	      	 	
 	this->head = nullptr;
 	this->size = 0;
 }
@@ -46,11 +46,11 @@ template<typename T>
 ListaEnc<T>::~ListaEnc() {
 	this->destroiLista();
 }
-
+//inicio
 template<typename T>
 void ListaEnc<T>::adicionaNoInicio(const T& dado) {
 	Elemento<T>* novo_elemento = new Elemento<T>(dado, this->head);
-	if (novo_elemento == nullptr)
+	if (novo_elemento == nullptr) 
 		throw std::out_of_range("erro lista cheia");
 	this->head = novo_elemento;
 	this->size++;
@@ -76,8 +76,9 @@ void ListaEnc<T>::eliminaDoInicio() {
 	this->head = inicio->getProximo();
 	this->size--;
 	delete inicio;
-}	 	  	 	     	   	      	     	  	     	  	 	
+}	 	  	 	     	  		  	  	    	      	 	
 
+//posicao
 template<typename T>
 void ListaEnc<T>::adicionaNaPosicao(const T& dado, int pos) {
 	if (pos == 0) {
@@ -91,14 +92,15 @@ void ListaEnc<T>::adicionaNaPosicao(const T& dado, int pos) {
 		}
 		Elemento<T>* novo_elemento = new Elemento<T>(dado, anterior->getProximo());
 		anterior->setProximo(novo_elemento);
-		this->size++;
+		this->size++; 
 	}
 }
 
 template<typename T>
 int ListaEnc<T>::posicao(const T& dado) const {
-	if (this->listaVazia())
+	if (this->listaVazia()) {
 		return -1;
+	}
 	Elemento<T>* elemento = this->head;
 	int indice = 0;
 	while (elemento->getInfo() != dado) {
@@ -112,7 +114,7 @@ int ListaEnc<T>::posicao(const T& dado) const {
 }
 
 template<typename T>
-T* ListaEnc<T>::posicaoMem(const T& dado) const {	 	  	 	     	   	      	     	  	     	  	 	
+T* ListaEnc<T>::posicaoMem(const T& dado) const {	 	  	 	     	  		  	  	    	      	 	
 	if (this->listaVazia()) {
 		throw std::out_of_range("lista vazia");
 	}
@@ -125,7 +127,6 @@ T* ListaEnc<T>::posicaoMem(const T& dado) const {
 	}
 	return elemento->getInfoPointer();
 }
-
 
 template<typename T>
 bool ListaEnc<T>::contem(const T& dado) {
@@ -155,7 +156,7 @@ T ListaEnc<T>::retiraDaPosicao(int pos) {
 		this->size--;
 		delete elimina;
 		return dado;
-	}	 	  	 	     	   	      	     	  	     	  	 	
+	}	 	  	 	     	  		  	  	    	      	 	
 }
 
 template<typename T>
@@ -171,7 +172,7 @@ T ListaEnc<T>::retornaDaPosicao(int pos) {
 		elemento = elemento->getProximo();
 	return elemento->getInfo();
 }
-
+//fim
 template<typename T>
 void ListaEnc<T>::adiciona(const T& dado) {
 	if (this->listaVazia())
@@ -192,7 +193,7 @@ T ListaEnc<T>::retiraEspecifico(const T& dado) {
 }
 
 template<typename T>
-void ListaEnc<T>::adicionaEmOrdem(const T& dado) {	 	  	 	     	   	      	     	  	     	  	 	
+void ListaEnc<T>::adicionaEmOrdem(const T& dado) {	 	  	 	     	  		  	  	    	      	 	
 	if (this->listaVazia())
 		return this->adicionaNoInicio(dado);
 	Elemento<T>* atual = this->head;
@@ -214,11 +215,6 @@ bool ListaEnc<T>::listaVazia() const {
 }
 
 template<typename T>
-int ListaEnc<T>::tamanho() const {
-	return this->size;
-}
-
-template<typename T>
 bool ListaEnc<T>::igual(T dado1, T dado2) {
 	return dado1 == dado2;
 }
@@ -229,12 +225,12 @@ bool ListaEnc<T>::maior(T dado1, T dado2) {
 }
 
 template<typename T>
-bool ListaEnc<T>::menor(T dado1, T dado2) {	 	  	 	     	   	      	     	  	     	  	 	
+bool ListaEnc<T>::menor(T dado1, T dado2) {
 	return dado1 < dado2;
 }
 
 template<typename T>
-void ListaEnc<T>::destroiLista() {
+void ListaEnc<T>::destroiLista() {	 	  	 	     	  		  	  	    	      	 	
 	Elemento<T> *atual, *anterior;
 	atual = this->head;
 	for (int i = 0; i < this->size; i++) {
