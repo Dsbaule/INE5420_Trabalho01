@@ -34,7 +34,7 @@ class Coordinate: public std::vector<double> {
  					sum += this->at(j) * m[j][i];
  				}
  				res.push_back(sum);
- 			} 	  	 	     	  		  	  	    	      	 	
+ 			}
  			for (int i = 0; i < res.size(); ++i) {
  				// bringing back to w = 1;
  				this->at(i) = res[i]/res[3];
@@ -48,7 +48,7 @@ class Coordinate: public std::vector<double> {
                 this->at(i) = this->at(i) + other[i];
             return *this;
  		};
- 		
+
  		friend Coordinate operator+(Coordinate lhs, const Coordinate& rhs) {
  			lhs += rhs;
  			return lhs;
@@ -61,7 +61,7 @@ class Coordinate: public std::vector<double> {
                 this->at(i) = this->at(i) - other[i];
             return *this;
  		};
- 		
+
  		friend Coordinate operator-(Coordinate lhs, const Coordinate& rhs) {
  			lhs -= rhs;
  			return lhs;
@@ -73,7 +73,7 @@ class Coordinate: public std::vector<double> {
 			for (int i = 0; i < this->size(); ++i) {
 				if (this->at(i) != other[i])
 					return false;
-			}	 	  	 	     	  		  	  	    	      	 	
+			}
 			return true;
 		};
 

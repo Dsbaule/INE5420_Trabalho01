@@ -156,8 +156,315 @@ GtkButton* schedule_button;
 GtkButton* change_obj_button;
 GtkToggleButton *x_checkr,*y_checkr,*z_checkr;
 
-void fill_treeview(const char* name,const char* type);
+/* ---------- Main Window Button Functions --------- */
+void on_zoom_in_button_clicked (GtkWidget *widget, gpointer data);
+void on_zoom_out_button_clicked (GtkWidget *widget, gpointer data);
+void on_up_button_clicked (GtkWidget *widget, gpointer data);
+void on_down_button_clicked (GtkWidget *widget, gpointer data);
+void on_left_button_clicked (GtkWidget *widget, gpointer data);
+void on_right_button_clicked (GtkWidget *widget, gpointer data);
+void on_back_button_clicked (GtkWidget *widget, gpointer data);
+void on_forward_button_clicked (GtkWidget *widget, gpointer data);
+void on_rotate_right_clicked (GtkWidget *widget, gpointer data);
+void on_rotate_left_clicked (GtkWidget *widget, gpointer data);
+void on_add_object_button_clicked (GtkWidget *widget, gpointer data);
+void on_change_object_clicked (GtkWidget *widget, gpointer data);
+void open_file (GtkWidget *widget, gpointer data);
+void save_file (GtkWidget *widget, gpointer data);
+void reset_rotation (GtkWidget *widget, gpointer data);
+void reset_position (GtkWidget *widget, gpointer data);
+void on_settings_button_clicked (GtkWidget *widget, gpointer data);
+gboolean draw_objects(GtkWidget* widget, cairo_t* cr, gpointer data);
 int get_index_selected();
+void create_treeview (void);
+void fill_treeview (const char* name, const char* type);
+
+/* ---------- Add Object Window Button Functions --------- */
+void on_add_point_clicked (GtkWidget *widget, gpointer data);
+void on_add_line_clicked (GtkWidget *widget, gpointer data);
+void on_add_point_poly_clicked (GtkWidget *widget, gpointer data);
+void on_add_point_face_clicked (GtkWidget *widget, gpointer data);
+void on_add_poly_clicked (GtkWidget *widget, gpointer data);
+void on_add_point_curve_clicked (GtkWidget *widget, gpointer data);
+void on_add_curve_clicked (GtkWidget *widget, gpointer data);
+void on_add_face_clicked (GtkWidget *widget, gpointer data);
+void on_add_object3D_clicked (GtkWidget *widget, gpointer data);
+void on_add_point_surface_clicked (GtkWidget *widget, gpointer data);
+void on_add_surface_clicked (GtkWidget *widget, gpointer data);
+void on_surface_spinbutton_clicked (GtkWidget *widget, gpointer data);
+
+/* ---------- Change Object Window Button Functions --------- */
+void on_angle_world_button_clicked (GtkWidget *widget, gpointer data);
+void on_angle_obj_button_clicked(GtkWidget *widget, gpointer data);
+void on_translate_button_clicked (GtkWidget *widget, gpointer data);
+void on_rotate_point_button_clicked (GtkWidget *widget, gpointer data);
+void on_schedule_button_clicked (GtkWidget *widget, gpointer data);
+void on_change_obj_button_clicked (GtkWidget *widget, gpointer data);
+
+/* ---------- Settings Window Button Functions --------- */
+void fov_scale_event();
+
+/* ---------- Checkbox Functions ---------- */
+void check();
+void check_parallel_event();
+void check_perspective_event();
+void check_x();
+void check_y();
+void check_z();
+void check_xr();
+void check_yr();
+void check_zr();
+
+int main (int argc, char *argv[]) {
+    /* ---------- Init GTK ---------- */
+	gtk_init (&argc, &argv);
+
+    /* ---------- Load Glade UI ---------- */
+	builder = gtk_builder_new ();
+	gtk_builder_add_from_file (builder, "Interface.glade", NULL);
+
+    /* ---------- Main Window ---------- */
+
+	/* Init Window */
+	main_w = gtk_builder_get_object (builder, "main_w");
+	g_signal_connect (main_w, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+	gtk_window_set_resizable (GTK_WINDOW(main_w),  false);
+
+    /* Init Viewport */
+	viewport = new Viewport(510,515);
+	draw_viewport = GTK_WIDGET(gtk_builder_get_object(builder, "draw_viewport"));
+	g_signal_connect(draw_viewport, "draw", G_CALLBACK(draw_objects), NULL);
+
+	/* Init Treeview*/
+	objects_tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, "object_tree"));
+	create_treeview();
+
+    /* Menu Items */
+   /* File */
+	open_file_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "file_open_menu_item"));
+	g_signal_connect (open_file_m, "activate", G_CALLBACK (open_file), NULL);
+	save_file_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "file_save_menu_item"));
+	g_signal_connect (save_file_m, "activate", G_CALLBACK (save_file), NULL);
+   /* View */
+	reset_rotation_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "reset_rotation_menu_item"));
+	g_signal_connect (reset_rotation_m, "activate", G_CALLBACK (reset_rotation), NULL);
+	reset_position_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "reset_position_menu_item"));
+	g_signal_connect (reset_position_m, "activate", G_CALLBACK (reset_position), NULL);
+
+    /* Controls */
+    zoom_in_button = GTK_BUTTON(gtk_builder_get_object(builder, "zoom_in"));
+    g_signal_connect (zoom_in_button, "clicked", G_CALLBACK (on_zoom_in_button_clicked), NULL);
+
+    zoom_out_button = GTK_BUTTON(gtk_builder_get_object(builder, "zoom_out"));
+    g_signal_connect (zoom_out_button, "clicked", G_CALLBACK (on_zoom_out_button_clicked), NULL);
+
+    move_down_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_down"));
+    g_signal_connect (move_down_button, "clicked", G_CALLBACK (on_down_button_clicked), NULL);
+
+    move_up_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_up"));
+    g_signal_connect (move_up_button, "clicked", G_CALLBACK (on_up_button_clicked), NULL);
+
+    move_right_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_right"));
+    g_signal_connect (move_right_button, "clicked", G_CALLBACK (on_right_button_clicked), NULL);
+
+    move_left_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_left"));
+    g_signal_connect (move_left_button, "clicked", G_CALLBACK (on_left_button_clicked), NULL);
+
+    move_back_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_back"));
+    g_signal_connect (move_back_button, "clicked", G_CALLBACK (on_back_button_clicked), NULL);
+
+    move_forward_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_forward"));
+    g_signal_connect (move_forward_button, "clicked", G_CALLBACK (on_forward_button_clicked), NULL);
+
+    add_object_button = GTK_BUTTON(gtk_builder_get_object(builder, "add_object_button"));
+    g_signal_connect (add_object_button, "clicked", G_CALLBACK (on_add_object_button_clicked), NULL);
+
+    change_object_button = GTK_BUTTON(gtk_builder_get_object(builder, "change_object"));
+    g_signal_connect (change_object_button, "clicked", G_CALLBACK (on_change_object_clicked), NULL);
+
+    rotate_left_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_left"));
+    g_signal_connect (rotate_left_button, "clicked", G_CALLBACK (on_rotate_left_clicked), NULL);
+
+    rotate_right_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_right"));
+    g_signal_connect (rotate_right_button, "clicked", G_CALLBACK (on_rotate_right_clicked), NULL);
+
+    settings_button = GTK_BUTTON(gtk_builder_get_object(builder, "settings_button"));
+    g_signal_connect (settings_button, "clicked", G_CALLBACK (on_settings_button_clicked), NULL);
+
+    step_entry = GTK_ENTRY(gtk_builder_get_object(builder, "step_entry"));
+    angle_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_entry"));
+
+    /* ---------- Settings Window ---------- */
+	settings_w = gtk_builder_get_object (builder, "settings_w");
+	g_signal_connect (settings_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
+
+    /* Projection Settings */
+	check_parallel = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"projection_parallel_checkbox"));
+    g_signal_connect(check_parallel, "toggled", G_CALLBACK(check_parallel_event), NULL);
+    check_perspective = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"projection_perspective_checkbox"));
+    g_signal_connect(check_perspective, "toggled", G_CALLBACK(check_perspective_event), NULL);
+    /* FOV */
+	fov_scale = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "fov_ajustment"));
+    g_signal_connect(fov_scale, "value-changed", G_CALLBACK(fov_scale_event), NULL);
+    /* Clipping */
+    CS_Clipping = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"line_clipping_cs_checkbox"));
+    g_signal_connect(CS_Clipping, "toggled", G_CALLBACK(check), NULL);
+
+    LB_Clipping = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"line_clipping_lb_checkbox"));
+    g_signal_connect(LB_Clipping, "toggled", G_CALLBACK(check), NULL);
+
+    /* ---------- Add Object Window ---------- */
+    /* Init Add Object Window */
+	add_object_w = gtk_builder_get_object (builder, "add_object_w");
+	g_signal_connect (add_object_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
+
+    /* Point */
+	add_point_button = GTK_BUTTON(gtk_builder_get_object(builder, "point_add_button"));
+	g_signal_connect (add_point_button, "clicked", G_CALLBACK (on_add_point_clicked), NULL);
+
+    name_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_name_text_entry"));
+	x_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x_coord_text_entry"));
+	y_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y_coord_text_entry"));
+	z_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z_coord_text_entry"));
+
+    /* Line */
+	add_line_button = GTK_BUTTON(gtk_builder_get_object(builder, "line_add_button"));
+	g_signal_connect (add_line_button, "clicked", G_CALLBACK (on_add_line_clicked), NULL);
+
+    name_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "line_name_text_entry"));
+	x1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x1_coord_text_entry"));
+	y1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y1_coord_text_entry"));
+	z1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z1_coord_text_entry"));
+	x2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x2_coord_text_entry"));
+	y2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y2_coord_text_entry"));
+	z2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z2_coord_text_entry"));
+
+    /* Polygon */
+	add_point_poly_button = GTK_BUTTON(gtk_builder_get_object(builder, "polygon_add_point_button"));
+	g_signal_connect (add_point_poly_button, "clicked", G_CALLBACK (on_add_point_poly_clicked), NULL);
+
+	add_poly_button = GTK_BUTTON(gtk_builder_get_object(builder, "polygon_add_button"));
+	g_signal_connect (add_poly_button, "clicked", G_CALLBACK (on_add_poly_clicked), NULL);
+
+    name_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_name_text_entry"));
+	x_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_x_coord_text_entry"));
+	y_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_y_coord_text_entry"));
+	z_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_z_coord_text_entry"));
+
+    filled_poly_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"polygon_fill_checkbutton"));
+
+    /* Curve */
+    add_point_curve_button = GTK_BUTTON(gtk_builder_get_object(builder, "curve_add_point_button"));
+    g_signal_connect (add_point_curve_button, "clicked", G_CALLBACK (on_add_point_curve_clicked), NULL);
+
+    add_curve_button = GTK_BUTTON(gtk_builder_get_object(builder, "curve_add_button"));
+    g_signal_connect (add_curve_button, "clicked", G_CALLBACK (on_add_curve_clicked), NULL);
+
+    name_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_name_text_entry"));
+    x_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_x_coord_text_entry"));
+    y_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_y_coord_text_entry"));
+    z_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_z_coord_text_entry"));
+
+    curve_bs_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"curve_bspline_checkbutton"));
+    control_point_number_label = GTK_LABEL(gtk_builder_get_object(builder, "curve_controlpoints_label"));
+
+    /* 3D Object */
+    add_point_face_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_point_button"));
+	g_signal_connect (add_point_face_button, "clicked", G_CALLBACK (on_add_point_face_clicked), NULL);
+
+    add_face_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_face_button"));
+    g_signal_connect (add_face_button, "clicked", G_CALLBACK (on_add_face_clicked), NULL);
+
+    add_object3D_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_button"));
+    g_signal_connect (add_object3D_button, "clicked", G_CALLBACK (on_add_object3D_clicked), NULL);
+
+    x_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_x_coord_text_entry"));
+    y_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_y_coord_text_entry"));
+    z_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_z_coord_text_entry"));
+    name_object3D_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_name_text_entry"));
+
+    filled_object3D_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"object3d_fill_checkbutton"));
+
+    /* Surface */
+    add_point_surface_button = GTK_BUTTON(gtk_builder_get_object(builder, "surface_addpoint_button"));
+    g_signal_connect (add_point_surface_button, "clicked", G_CALLBACK (on_add_point_surface_clicked), NULL);
+
+    add_surface_button = GTK_BUTTON(gtk_builder_get_object(builder, "surface_add_button"));
+    g_signal_connect (add_surface_button, "clicked", G_CALLBACK (on_add_surface_clicked), NULL);
+
+    name_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_name_text_entry"));
+    x_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_x_coord_text_entry"));
+    y_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_y_coord_text_entry"));
+    z_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_z_coord_text_entry"));
+    surface_bs_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"surface_BS_checkbutton"));
+    surface_be_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"surface_BE_checkbutton"));
+
+    surface_rows_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"surface_rows_spinbutton"));
+    g_signal_connect (surface_rows_spinbutton, "value-changed", G_CALLBACK (on_surface_spinbutton_clicked), NULL);
+    surface_columns_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"surface_columns_spinbutton"));
+    g_signal_connect (surface_columns_spinbutton, "value-changed", G_CALLBACK (on_surface_spinbutton_clicked), NULL);
+
+    label_current_index = GTK_LABEL(gtk_builder_get_object(builder, "surface_currindex_number_label"));
+    label_previous_point = GTK_LABEL(gtk_builder_get_object(builder, "surface_previndex_number_label"));
+
+	/* Buttons Change object */
+	change_obj_w = gtk_builder_get_object (builder, "change_obj_w");
+	g_signal_connect (change_obj_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
+
+	angle_world_button = GTK_BUTTON(gtk_builder_get_object(builder, "angle_world_button"));
+	g_signal_connect (angle_world_button  , "clicked", G_CALLBACK (on_angle_world_button_clicked), NULL);
+
+	angle_obj_button = GTK_BUTTON(gtk_builder_get_object(builder, "angle_obj_button"));
+	g_signal_connect (angle_obj_button, "clicked", G_CALLBACK (on_angle_obj_button_clicked), NULL);
+
+	translate_button = GTK_BUTTON(gtk_builder_get_object(builder, "translate_button"));
+	g_signal_connect (translate_button, "clicked", G_CALLBACK (on_translate_button_clicked), NULL);
+
+	rotate_point_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_point_button"));
+	g_signal_connect (rotate_point_button, "clicked", G_CALLBACK (on_rotate_point_button_clicked), NULL);
+
+	schedule_button = GTK_BUTTON(gtk_builder_get_object(builder, "schedule_button"));
+	g_signal_connect (schedule_button, "clicked", G_CALLBACK (on_schedule_button_clicked), NULL);
+
+	change_obj_button = GTK_BUTTON(gtk_builder_get_object(builder, "change_obj_button"));
+	g_signal_connect (change_obj_button, "clicked", G_CALLBACK (on_change_obj_button_clicked), NULL);
+
+	/* Connecting Entry*/
+	angle_world_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_world_entry"));
+	angle_obj_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_obj_entry"));
+	trans_x_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_x_entry"));
+	trans_y_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_y_entry"));
+	trans_z_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_z_entry"));
+	angle_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_point_entry"));
+	angle_pointx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointx_entry"));
+	angle_pointy_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointy_entry"));
+	angle_pointz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointz_entry"));
+	angle_vectorx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectorx_entry"));
+	angle_vectory_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectory_entry"));
+	angle_vectorz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectorz_entry"));
+	sx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sx_entry"));
+	sy_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sy_entry"));
+	sz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sz_entry"));
+    x_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"x_check"));
+    y_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"y_check"));
+    z_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"z_check"));
+    x_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"x_checkr"));
+    y_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"y_checkr"));
+    z_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"z_checkr"));
+    g_signal_connect(x_check, "toggled", G_CALLBACK(check_x), NULL);
+    g_signal_connect(y_check, "toggled", G_CALLBACK(check_y), NULL);
+    g_signal_connect(z_check, "toggled", G_CALLBACK(check_z), NULL);
+    g_signal_connect(x_checkr, "toggled", G_CALLBACK(check_xr), NULL);
+    g_signal_connect(y_checkr, "toggled", G_CALLBACK(check_yr), NULL);
+    g_signal_connect(z_checkr, "toggled", G_CALLBACK(check_zr), NULL);
+
+	gtk_widget_show(GTK_WIDGET(main_w));
+
+	gtk_main ();
+
+	return 0;
+}
+
 
 /* CALLBACKS */
 
@@ -723,278 +1030,4 @@ void check_zr() {
         gtk_toggle_button_set_active(x_checkr, false);
         gtk_toggle_button_set_active(y_checkr, false);
     }
-}
-
-void create_treeview (void) {
-	GtkCellRenderer *renderer;
-	GtkTreeModel *model;
-
-	/* Column 1 */
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (objects_tree), -1, "ID", renderer, "text", COL_ID, NULL);
-
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (objects_tree), -1, "Name", renderer, "text", COL_NAME, NULL);
-
-	/* Column 2 */
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (objects_tree), -1, "Type", renderer, "text", COL_TYPE, NULL);
-
-	model = GTK_TREE_MODEL (store = gtk_list_store_new (NUM_COLS, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING));
-	gtk_tree_view_set_model (GTK_TREE_VIEW (objects_tree), model);
-
-	objects_select = gtk_tree_view_get_selection(objects_tree);
-	gtk_tree_selection_set_mode(objects_select, GTK_SELECTION_SINGLE);
-
-	g_object_unref (model);
-}
-
-int main (int argc, char *argv[]) {
-    /* ---------- Init GTK ---------- */
-	gtk_init (&argc, &argv);
-
-    /* ---------- Load Glade UI ---------- */
-	builder = gtk_builder_new ();
-	gtk_builder_add_from_file (builder, "Interface.glade", NULL);
-
-    /* ---------- Main Window ---------- */
-
-	/* Init Window */
-	main_w = gtk_builder_get_object (builder, "main_w");
-	g_signal_connect (main_w, "destroy", G_CALLBACK (gtk_main_quit), NULL);
-	gtk_window_set_resizable (GTK_WINDOW(main_w),  false);
-
-    /* Init Viewport */
-	viewport = new Viewport(510,515);
-	draw_viewport = GTK_WIDGET(gtk_builder_get_object(builder, "draw_viewport"));
-	g_signal_connect(draw_viewport, "draw", G_CALLBACK(draw_objects), NULL);
-
-	/* Init Treeview*/
-	objects_tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, "object_tree"));
-	create_treeview();
-
-    /* Menu Items */
-   /* File */
-	open_file_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "file_open_menu_item"));
-	g_signal_connect (open_file_m, "activate", G_CALLBACK (open_file), NULL);
-	save_file_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "file_save_menu_item"));
-	g_signal_connect (save_file_m, "activate", G_CALLBACK (save_file), NULL);
-   /* View */
-	reset_rotation_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "reset_rotation_menu_item"));
-	g_signal_connect (reset_rotation_m, "activate", G_CALLBACK (reset_rotation), NULL);
-	reset_position_m = GTK_MENU_ITEM(gtk_builder_get_object(builder, "reset_position_menu_item"));
-	g_signal_connect (reset_position_m, "activate", G_CALLBACK (reset_position), NULL);
-
-    /* Controls */
-    zoom_in_button = GTK_BUTTON(gtk_builder_get_object(builder, "zoom_in"));
-    g_signal_connect (zoom_in_button, "clicked", G_CALLBACK (on_zoom_in_button_clicked), NULL);
-
-    zoom_out_button = GTK_BUTTON(gtk_builder_get_object(builder, "zoom_out"));
-    g_signal_connect (zoom_out_button, "clicked", G_CALLBACK (on_zoom_out_button_clicked), NULL);
-
-    move_down_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_down"));
-    g_signal_connect (move_down_button, "clicked", G_CALLBACK (on_down_button_clicked), NULL);
-
-    move_up_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_up"));
-    g_signal_connect (move_up_button, "clicked", G_CALLBACK (on_up_button_clicked), NULL);
-
-    move_right_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_right"));
-    g_signal_connect (move_right_button, "clicked", G_CALLBACK (on_right_button_clicked), NULL);
-
-    move_left_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_left"));
-    g_signal_connect (move_left_button, "clicked", G_CALLBACK (on_left_button_clicked), NULL);
-
-    move_back_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_back"));
-    g_signal_connect (move_back_button, "clicked", G_CALLBACK (on_back_button_clicked), NULL);
-
-    move_forward_button = GTK_BUTTON(gtk_builder_get_object(builder, "move_forward"));
-    g_signal_connect (move_forward_button, "clicked", G_CALLBACK (on_forward_button_clicked), NULL);
-
-    add_object_button = GTK_BUTTON(gtk_builder_get_object(builder, "add_object_button"));
-    g_signal_connect (add_object_button, "clicked", G_CALLBACK (on_add_object_button_clicked), NULL);
-
-    change_object_button = GTK_BUTTON(gtk_builder_get_object(builder, "change_object"));
-    g_signal_connect (change_object_button, "clicked", G_CALLBACK (on_change_object_clicked), NULL);
-
-    rotate_left_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_left"));
-    g_signal_connect (rotate_left_button, "clicked", G_CALLBACK (on_rotate_left_clicked), NULL);
-
-    rotate_right_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_right"));
-    g_signal_connect (rotate_right_button, "clicked", G_CALLBACK (on_rotate_right_clicked), NULL);
-
-    settings_button = GTK_BUTTON(gtk_builder_get_object(builder, "settings_button"));
-    g_signal_connect (settings_button, "clicked", G_CALLBACK (on_settings_button_clicked), NULL);
-
-    step_entry = GTK_ENTRY(gtk_builder_get_object(builder, "step_entry"));
-    angle_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_entry"));
-
-    /* ---------- Settings Window ---------- */
-	settings_w = gtk_builder_get_object (builder, "settings_w");
-	g_signal_connect (settings_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
-
-    /* Projection Settings */
-	check_parallel = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"projection_parallel_checkbox"));
-    g_signal_connect(check_parallel, "toggled", G_CALLBACK(check_parallel_event), NULL);
-    check_perspective = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"projection_perspective_checkbox"));
-    g_signal_connect(check_perspective, "toggled", G_CALLBACK(check_perspective_event), NULL);
-    /* FOV */
-	fov_scale = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "projection_fov_scale"));
-    g_signal_connect(fov_scale, "value-changed", G_CALLBACK(fov_scale_event), NULL);
-    /* Clipping */
-    CS_Clipping = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"line_clipping_cs_checkbox"));
-    g_signal_connect(CS_Clipping, "toggled", G_CALLBACK(check), NULL);
-
-    LB_Clipping = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"line_clipping_lb_checkbox"));
-    g_signal_connect(LB_Clipping, "toggled", G_CALLBACK(check), NULL);
-
-    /* ---------- Add Object Window ---------- */
-    /* Init Add Object Window */
-	add_object_w = gtk_builder_get_object (builder, "add_object_w");
-	g_signal_connect (add_object_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
-
-    /* Point */
-	add_point_button = GTK_BUTTON(gtk_builder_get_object(builder, "point_add_button"));
-	g_signal_connect (add_point_button, "clicked", G_CALLBACK (on_add_point_clicked), NULL);
-
-    name_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_name_text_entry"));
-	x_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x_coord_text_entry"));
-	y_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y_coord_text_entry"));
-	z_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z_coord_text_entry"));
-
-    /* Line */
-	add_line_button = GTK_BUTTON(gtk_builder_get_object(builder, "line_add_button"));
-	g_signal_connect (add_line_button, "clicked", G_CALLBACK (on_add_line_clicked), NULL);
-
-    name_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "line_name_text_entry"));
-	x1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x1_coord_text_entry"));
-	y1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y1_coord_text_entry"));
-	z1_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z1_coord_text_entry"));
-	x2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_x2_coord_text_entry"));
-	y2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_y2_coord_text_entry"));
-	z2_line_entry = GTK_ENTRY(gtk_builder_get_object(builder, "point_z2_coord_text_entry"));
-
-    /* Polygon */
-	add_point_poly_button = GTK_BUTTON(gtk_builder_get_object(builder, "polygon_add_point_button"));
-	g_signal_connect (add_point_poly_button, "clicked", G_CALLBACK (on_add_point_poly_clicked), NULL);
-
-	add_poly_button = GTK_BUTTON(gtk_builder_get_object(builder, "polygon_add_button"));
-	g_signal_connect (add_poly_button, "clicked", G_CALLBACK (on_add_poly_clicked), NULL);
-
-    name_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_name_text_entry"));
-	x_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_x_coord_text_entry"));
-	y_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_y_coord_text_entry"));
-	z_poly_entry = GTK_ENTRY(gtk_builder_get_object(builder, "polygon_z_coord_text_entry"));
-
-    filled_poly_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"polygon_fill_checkbutton"));
-
-    /* Curve */
-    add_point_curve_button = GTK_BUTTON(gtk_builder_get_object(builder, "curve_add_point_button"));
-    g_signal_connect (add_point_curve_button, "clicked", G_CALLBACK (on_add_point_curve_clicked), NULL);
-
-    add_curve_button = GTK_BUTTON(gtk_builder_get_object(builder, "curve_add_button"));
-    g_signal_connect (add_curve_button, "clicked", G_CALLBACK (on_add_curve_clicked), NULL);
-
-    name_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_name_text_entry"));
-    x_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_x_coord_text_entry"));
-    y_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_y_coord_text_entry"));
-    z_curve_entry = GTK_ENTRY(gtk_builder_get_object(builder, "curve_z_coord_text_entry"));
-
-    curve_bs_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"curve_bspline_checkbutton"));
-    control_point_number_label = GTK_LABEL(gtk_builder_get_object(builder, "curve_controlpoints_label"));
-
-    /* 3D Object */
-    add_point_face_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_point_button"));
-	g_signal_connect (add_point_face_button, "clicked", G_CALLBACK (on_add_point_face_clicked), NULL);
-
-    add_face_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_face_button"));
-    g_signal_connect (add_face_button, "clicked", G_CALLBACK (on_add_face_clicked), NULL);
-
-    add_object3D_button = GTK_BUTTON(gtk_builder_get_object(builder, "object3d_add_button"));
-    g_signal_connect (add_object3D_button, "clicked", G_CALLBACK (on_add_object3D_clicked), NULL);
-
-    x_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_x_coord_text_entry"));
-    y_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_y_coord_text_entry"));
-    z_face_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_z_coord_text_entry"));
-    name_object3D_entry = GTK_ENTRY(gtk_builder_get_object(builder, "object3d_name_text_entry"));
-
-    filled_object3D_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"object3d_fill_checkbutton"));
-
-    /* Surface */
-    add_point_surface_button = GTK_BUTTON(gtk_builder_get_object(builder, "surface_addpoint_button"));
-    g_signal_connect (add_point_surface_button, "clicked", G_CALLBACK (on_add_point_surface_clicked), NULL);
-
-    add_surface_button = GTK_BUTTON(gtk_builder_get_object(builder, "surface_add_button"));
-    g_signal_connect (add_surface_button, "clicked", G_CALLBACK (on_add_surface_clicked), NULL);
-
-    name_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_name_text_entry"));
-    x_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_x_coord_text_entry"));
-    y_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_y_coord_text_entry"));
-    z_surface_entry = GTK_ENTRY(gtk_builder_get_object(builder, "surface_z_coord_text_entry"));
-    surface_bs_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"surface_BS_checkbutton"));
-    surface_be_checkbox = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"surface_BE_checkbutton"));
-
-    surface_rows_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"surface_rows_spinbutton"));
-    g_signal_connect (surface_rows_spinbutton, "value-changed", G_CALLBACK (on_surface_spinbutton_clicked), NULL);
-    surface_columns_spinbutton = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"surface_columns_spinbutton"));
-    g_signal_connect (surface_columns_spinbutton, "value-changed", G_CALLBACK (on_surface_spinbutton_clicked), NULL);
-
-    label_current_index = GTK_LABEL(gtk_builder_get_object(builder, "surface_currindex_number_label"));
-    label_previous_point = GTK_LABEL(gtk_builder_get_object(builder, "surface_previndex_number_label"));
-
-	/* Buttons Change object */
-	change_obj_w = gtk_builder_get_object (builder, "change_obj_w");
-	g_signal_connect (change_obj_w, "delete_event", G_CALLBACK (gtk_widget_hide_on_delete), NULL);
-
-	angle_world_button = GTK_BUTTON(gtk_builder_get_object(builder, "angle_world_button"));
-	g_signal_connect (angle_world_button  , "clicked", G_CALLBACK (on_angle_world_button_clicked), NULL);
-
-	angle_obj_button = GTK_BUTTON(gtk_builder_get_object(builder, "angle_obj_button"));
-	g_signal_connect (angle_obj_button, "clicked", G_CALLBACK (on_angle_obj_button_clicked), NULL);
-
-	translate_button = GTK_BUTTON(gtk_builder_get_object(builder, "translate_button"));
-	g_signal_connect (translate_button, "clicked", G_CALLBACK (on_translate_button_clicked), NULL);
-
-	rotate_point_button = GTK_BUTTON(gtk_builder_get_object(builder, "rotate_point_button"));
-	g_signal_connect (rotate_point_button, "clicked", G_CALLBACK (on_rotate_point_button_clicked), NULL);
-
-	schedule_button = GTK_BUTTON(gtk_builder_get_object(builder, "schedule_button"));
-	g_signal_connect (schedule_button, "clicked", G_CALLBACK (on_schedule_button_clicked), NULL);
-
-	change_obj_button = GTK_BUTTON(gtk_builder_get_object(builder, "change_obj_button"));
-	g_signal_connect (change_obj_button, "clicked", G_CALLBACK (on_change_obj_button_clicked), NULL);
-
-	/* Connecting Entry*/
-	angle_world_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_world_entry"));
-	angle_obj_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_obj_entry"));
-	trans_x_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_x_entry"));
-	trans_y_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_y_entry"));
-	trans_z_entry = GTK_ENTRY(gtk_builder_get_object(builder, "trans_z_entry"));
-	angle_point_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_point_entry"));
-	angle_pointx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointx_entry"));
-	angle_pointy_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointy_entry"));
-	angle_pointz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_pointz_entry"));
-	angle_vectorx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectorx_entry"));
-	angle_vectory_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectory_entry"));
-	angle_vectorz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "angle_vectorz_entry"));
-	sx_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sx_entry"));
-	sy_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sy_entry"));
-	sz_entry = GTK_ENTRY(gtk_builder_get_object(builder, "sz_entry"));
-    x_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"x_check"));
-    y_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"y_check"));
-    z_check = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"z_check"));
-    x_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"x_checkr"));
-    y_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"y_checkr"));
-    z_checkr = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"z_checkr"));
-    g_signal_connect(x_check, "toggled", G_CALLBACK(check_x), NULL);
-    g_signal_connect(y_check, "toggled", G_CALLBACK(check_y), NULL);
-    g_signal_connect(z_check, "toggled", G_CALLBACK(check_z), NULL);
-    g_signal_connect(x_checkr, "toggled", G_CALLBACK(check_xr), NULL);
-    g_signal_connect(y_checkr, "toggled", G_CALLBACK(check_yr), NULL);
-    g_signal_connect(z_checkr, "toggled", G_CALLBACK(check_zr), NULL);
-
-	gtk_widget_show(GTK_WIDGET(main_w));
-
-	gtk_main ();
-
-	return 0;
 }
