@@ -25,42 +25,6 @@
          dos objetos.
 */
 
-// class ColorReader
-// {
-//     public:
-//         ColorReader(){ m_colors["Padrao"] = GdkRGBA{}; }
-//         bool loadFile(const std::string& filename);
-//         const GdkRGBA& getColor(const std::string& colorName) const;
-
-//     private:
-//         void loadColors();
-//         void addColor(std::string name, std::stringstream& line);
-
-//     private:
-//         //Ex: <"Color0", GdkRGBA(0,0.6,0)>
-//         std::map<std::string, GdkRGBA> m_colors;
-//         std::ifstream m_ifs;
-// };
-
-// class ColorWriter
-// {	 	  	 	     	  		  	  	    	      	 	
-//     public:
-//         ColorWriter(){}
-//         void loadFile(const std::string& filename);
-//         std::string getColorName(const GdkRGBA& color);
-
-//     private:
-//         void writeColor(const std::string& colorName,
-//                             const GdkRGBA& color);
-
-//     private:
-//         //Ex: <"(0,0.6,0)", "Color0">
-//         std::map<std::string, std::string> m_colors;
-//         std::ofstream m_ofs;
-//         //Contador de cores ja escritas, usado no nome da cor
-//         int m_numColors = 0;
-// };
-
 class ObjStream
 {
     public:
@@ -115,7 +79,7 @@ class ObjReader : public ObjStream
 };
 
 class ObjWriter : public ObjStream
-{	 	  	 	     	  		  	  	    	      	 	
+{
     public:
         ObjWriter(std::string& filename);
         void writeObjs(Viewport *viewport);
@@ -152,7 +116,7 @@ ObjReader::ObjReader(std::string& filename):
 void ObjReader::destroyObjs(){
     for(auto o : m_objs)
         delete o;
-}	 	  	 	     	  		  	  	    	      	 	
+}
 
 void ObjReader::addObj3D(){
     std::string name = m_numSubObjs == 0 ? m_name :
@@ -189,7 +153,7 @@ void ObjReader::loadObjs(){
         else if(keyWord == "vt")        { /* Não faz nada... */ }                    // vt u v w
         else if(keyWord == "vn")        { /* Não faz nada... */ }                    // vn i j k
         else if(keyWord == "vp")        { /* Não faz nada... */ }                    // vp u v w
-    }	 	  	 	     	  		  	  	    	      	 	
+    }
     // Se chegar ao final e tiver alguma
     //  Face salva, ela pertence ao ultimo
     //  objeto 3D
@@ -225,7 +189,7 @@ void ObjReader::addCoord(std::stringstream& line){
     double x=0,y=0,z=0;
     line >> x >> y >> z;
     m_coords.emplace_back(x,y,z);
-}	 	  	 	     	  		  	  	    	      	 	
+}
 
 void ObjReader::addPoint(std::stringstream& line){
     if(m_faces.size() != 0)
@@ -261,7 +225,7 @@ void ObjReader::addPoly(std::stringstream& line, bool filled){
     else
         m_objs.push_back(new Polygon(name, objCoords, filled));
     m_numSubObjs++;
-}	 	  	 	     	  		  	  	    	      	 	
+}
 
 void ObjReader::addFace(std::stringstream& line){
     Coordinates objCoords;
@@ -297,7 +261,7 @@ void ObjReader::addCurve(std::stringstream& line){
     m_numSubObjs++;
 }
 
-void ObjReader::loadCoordsIndexes(std::stringstream& line, Coordinates& objCoords){	 	  	 	     	  		  	  	    	      	 	
+void ObjReader::loadCoordsIndexes(std::stringstream& line, Coordinates& objCoords){
     std::string pointString;
     int index = 0;
     int size = m_coords.size();
@@ -336,7 +300,7 @@ void ObjReader::loadCoordsIndexes(std::stringstream& line, Coordinates& objCoord
             // Pegue a proxima linha caso ache '\'
             //  ao final da linha atual
             std::string tmp;
-            if(std::getline(m_objsFile, tmp)){	 	  	 	     	  		  	  	    	      	 	
+            if(std::getline(m_objsFile, tmp)){
                 //line = std::stringstream(tmp);
                 line.str(tmp);
                 line.clear();
@@ -375,7 +339,7 @@ void ObjWriter::writeObjs(Viewport* viewport){
 
     Object *obj;
     int size = viewport->get_display_file_size();
-    for(int i = 0; i<size; i++){	 	  	 	     	  		  	  	    	      	 	
+    for(int i = 0; i<size; i++){
         obj = viewport->getObject(i);
         if(obj->get_type() == obj_type::OBJECT_3D)
             printObj3D((Object3D*) obj);
@@ -426,7 +390,7 @@ void ObjWriter::printObj(Object* obj){
         break;
     case obj_type::OBJECT_3D:
         break;//nunca vai acontecer
-    }	 	  	 	     	  		  	  	    	      	 	
+    }
 
     int size = coords.size();
     m_objsFile << keyWord;
@@ -462,7 +426,7 @@ void ObjWriter::printObj3D(Object3D* obj){
         m_objsFile << "\n";
         m_numVertex += face_size;
     }
-}	 	  	 	     	  		  	  	    	      	 	
+}
 
 // bool ColorReader::loadFile(const std::string& filename){
 //     m_ifs.open(filename);
@@ -498,7 +462,7 @@ void ObjWriter::printObj3D(Object3D* obj){
 //     auto iter = m_colors.find(colorName);
 //     if(iter != m_colors.end())
 //         return iter->second;
-//     else{	 	  	 	     	  		  	  	    	      	 	
+//     else{
 //         auto iter2 = m_colors.find("Padrao");
 //         return iter2->second;
 //     }
@@ -535,4 +499,3 @@ void ObjWriter::printObj3D(Object3D* obj){
 // }
 
 #endif // FILEHANDLERS_HPP
-	 	  	 	     	  		  	  	    	      	 	
